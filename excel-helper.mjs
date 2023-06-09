@@ -38,7 +38,9 @@ export const createCells = (cells, worksheet) => {
 export const getWorksheet = async (fileName, workSheetName) => {
     const fileData = readFileSync(fileName);
     const workbook = await fromDataAsync(fileData);
-    return workbook.sheet(workSheetName);
+    const worksheet = workbook.sheet(workSheetName);
+
+    return worksheet ? worksheet: workbook.sheets[0];
 }
 
 export const getCell = (address, worksheet) => {
@@ -51,8 +53,10 @@ export const deleteWorksheet = (workbook, sheetName) => {
 
 export const xlsToXlsx = (fileName) => {
     const workbookXLS = XLSX.readFile(fileName);
-    XLSX.writeFile(workbookXLS, `${fileName}.xlsx`);
-    return `${fileName}.xlsx`;
+    const newFileName = fileName.slice(0, fileName.lastIndexOf('.')) + '.xlsx'
+
+    XLSX.writeFile(workbookXLS, `${newFileName}`);
+    return newFileName;
 }
 
 export const countFilledRows = (worksheet) => {

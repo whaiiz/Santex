@@ -9,9 +9,13 @@ import { createExcel,
          from './excel-helper.mjs';
 import { parseDate, monthNumberToString } from './date-helper.mjs';
 import { groupBy } from './generic-helper.mjs';
+import fs from 'fs';
+
+let inputFile = '';
+let outputFile = '';
 
 const readSpents = async () => {
-    const worksheet = await getWorksheet(xlsToXlsx(process.argv[2]), "Folha1");
+    const worksheet = await getWorksheet(xlsToXlsx(inputFile), "Saldos e Movimentos");
     const rowsCount = countFilledRows(worksheet);
     let result = [];
 
@@ -88,6 +92,8 @@ const populateExcel = (data, workbook) => {
         let { monthCells, monthMerges } = getCellsForMonthlySpents(monthlySpents)
         createWorksheet({ cells: monthCells, merges: monthMerges, workbook, worksheetName: year });
     }
+
+    deleteWorksheet(workbook, "Sheet1");
 }
 
 const init = async () => {
@@ -95,12 +101,13 @@ const init = async () => {
     const spents = await readSpents();
 
     populateExcel(spents, workbook);
-    deleteWorksheet(workbook, "Sheet1");
-    saveExcel(workbook, process.argv[3]);
+    saveExcel(workbook, outputFile);
 }
 
-if (process.argv.length < 4) {
-    console.error("Please send input and output file through parameters!")
+if (process.argv.length < 4 || !fs.existsSync(process.argv[2])) {
+    console.error("node <path> <input-file> <output-file>")
 } else {
+    inputFile = process.argv[2];
+    outputFile = process.argv[3];
     init();
 }
